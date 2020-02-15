@@ -123,8 +123,8 @@ public final class Compiler {
   private static final String[] SUPPORT_AARS;
   private static final String COMP_BUILD_INFO =
       RUNTIME_FILES_DIR + "simple_components_build_info.json";
-  private static final String DX_JAR =
-      RUNTIME_FILES_DIR + "dx.jar";
+  private static final String D8_JAR =
+      RUNTIME_FILES_DIR + "d8.jar";
   private static final String KAWA_RUNTIME =
       RUNTIME_FILES_DIR + "kawa.jar";
   private static final String SIMPLE_ANDROID_RUNTIME_JAR =
@@ -289,6 +289,7 @@ public final class Compiler {
   private static final Logger LOG = Logger.getLogger(Compiler.class.getName());
 
   private BuildServer.ProgressReporter reporter; // Used to report progress of the build
+  private int minSdkForCompilation;
 
   /*
    * Generate the set of Android permissions needed by this project.
@@ -888,6 +889,7 @@ public final class Compiler {
           }
         }
       }
+      minSdkForCompilation = minSdk;
 
       // make permissions unique by putting them in one set
       Set<String> permissions = Sets.newHashSet();
@@ -1290,7 +1292,7 @@ public final class Compiler {
     }
 
     // Invoke dx on class files
-    out.println("________Invoking DX");
+    out.println("________Invoking D8");
     // TODO(markf): Running DX is now pretty slow (~25 sec overhead the first time and ~15 sec
     // overhead for subsequent runs).  I think it's because of the need to dx the entire
     // kawa runtime every time.  We should probably only do that once and then copy all the
@@ -1308,7 +1310,7 @@ public final class Compiler {
     // Android SDK's Dex Ant task
     File tmpDir = createDir(buildDir, "tmp");
     String dexedClassesDir = tmpDir.getAbsolutePath();
-    if (!compiler.runDx(classesDir, dexedClassesDir, false)) {
+    if (!compiler.runD8(classesDir, dexedClassesDir, false)) {
       return false;
     }
     if (reporter != null) {
@@ -1465,7 +1467,7 @@ public final class Compiler {
    * create a class file for every source file in the project.
    *
    * As a side effect, we generate uniqueLibsNeeded which contains a set of libraries used by
-   * runDx. Each library appears in the set only once (which is why it is a set!). This is
+   * runD8. Each library appears in the set only once (which is why it is a set!). This is
    * important because when we Dex the libraries, a given library can only appear once.
    *
    */

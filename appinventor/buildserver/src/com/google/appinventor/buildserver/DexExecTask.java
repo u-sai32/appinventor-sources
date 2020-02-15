@@ -39,11 +39,11 @@ public class DexExecTask {
     private String mExecutable;
     private String mOutput;
     private String mDexedLibs;
-    private boolean mVerbose = false;
-    private boolean mNoLocals = false;
     private int mChildProcessRamMb = 1024;
     private boolean mDisableDexMerger = false;
     private static Map<String, String> alreadyChecked = new HashMap<String, String>();
+    private int minApi;
+    private String androidJar;
 
     private static final Object semaphore = new Object(); // Used to protect dex cache creation
 
@@ -58,34 +58,16 @@ public class DexExecTask {
     }
 
     /**
-     * Sets the value of the "verbose" attribute.
-     *
-     * @param verbose the value.
-     */
-    public void setVerbose(boolean verbose) {
-        mVerbose = verbose;
-    }
-
-    /**
      * Sets the value of the "output" attribute.
      *
      * @param output the value.
      */
-    public void setOutput(String output) {
+    public void setOutputDir(String output) {
         mOutput = output;
     }
 
-    public void setDexedLibs(String dexedLibs) {
+    public void setDexCacheDir(String dexedLibs) {
         mDexedLibs = dexedLibs;
-    }
-
-    /**
-     * Sets the value of the "nolocals" attribute.
-     *
-     * @param verbose the value.
-     */
-    public void setNoLocals(boolean nolocals) {
-        mNoLocals = nolocals;
     }
 
     public void setChildProcessRamMb(int mb) {
@@ -94,6 +76,14 @@ public class DexExecTask {
 
     public void setDisableDexMerger(boolean disable) {
         mDisableDexMerger = disable;
+    }
+
+    public void setMinApi(int minApi) {
+        this.minApi = minApi;
+    }
+
+    public void setAndroidJar(String androidJar) {
+        this.androidJar = androidJar;
     }
 
     private boolean preDexLibraries(List<File> inputs) {
@@ -170,6 +160,7 @@ public class DexExecTask {
         System.out.println(String.format(
                 "Converting compiled files and external libraries into %1$s...", mOutput));
 
+        boolean mVerbose = false;
         return runDx(paths, mOutput, mVerbose /*showInputs*/);
     }
 
@@ -183,21 +174,20 @@ public class DexExecTask {
         List<String> commandLineList = new ArrayList<String>();
         commandLineList.add(System.getProperty("java.home") + "/bin/java");
         commandLineList.add("-mx" + mx + "M");
-        commandLineList.add("-jar");
+        commandLineList.add("-cp");
         commandLineList.add(mExecutable);
+        commandLineList.add("com.android.tools.r8.D8");
 
-        commandLineList.add("--dex");
-        commandLineList.add("--positions=lines");
+        commandLineList.add("--release");
 
-        if (mNoLocals) {
-            commandLineList.add("--no-locals");
-        }
+        commandLineList.add("--lib");
+        commandLineList.add(androidJar);
 
-        if (mVerbose) {
-            commandLineList.add("--verbose");
-        }
+        commandLineList.add("--min-api");
+        commandLineList.add(minApi);
 
-        commandLineList.add("--output=" + output);
+        commandLineList.add("--output");
+        commandLineList.add(output);
 
         for (File input : inputs) {
             String absPath = input.getAbsolutePath();
@@ -208,15 +198,13 @@ public class DexExecTask {
         }
 
         // Convert command line to an array
-        String[] dxCommandLine = new String[commandLineList.size()];
-        commandLineList.toArray(dxCommandLine);
+        String[] dxCommandLine = commandLineList.toArray(new String[0]);
 
-        boolean dxSuccess = Execution.execute(null, dxCommandLine, System.out, System.err);
-        return dxSuccess;
+        return Execution.execute(null, dxCommandLine, System.out, System.err);
 
     }
 
     protected String getExecTaskName() {
-        return "dx";
+        return "d8";
     }
 }

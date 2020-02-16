@@ -269,6 +269,7 @@ public final class Compiler {
   private File libsDir; // The directory that will contain any native libraries for packaging
   private String dexCacheDir;
   private boolean hasSecondDex = false; // True if classes2.dex should be added to the APK
+  private int minSdkForCompilation = Integer.parseInt(DEFAULT_MIN_SDK);
 
   private JSONArray simpleCompsBuildInfo;
   private JSONArray extCompsBuildInfo;
@@ -283,7 +284,6 @@ public final class Compiler {
   private static final Logger LOG = Logger.getLogger(Compiler.class.getName());
 
   private BuildServer.ProgressReporter reporter; // Used to report progress of the build
-  private int minSdkForCompilation;
 
   /*
    * Generate the set of Android permissions needed by this project.
@@ -1872,6 +1872,8 @@ public final class Compiler {
     d8Command.add(getResource(ANDROID_RUNTIME));
     d8Command.add("--main-dex-list");
     d8Command.add(getResource(MAIN_DEX_LIST));
+    d8Command.add("--min-api");
+    d8Command.add(minSdkForCompilation + "");
     d8Command.add("--output");
     d8Command.add(dexedClassesDir);
 

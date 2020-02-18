@@ -6,6 +6,9 @@
 
 package com.google.appinventor.buildserver;
 
+import com.android.ide.common.internal.AaptCruncher;
+import com.android.ide.common.internal.PngCruncher;
+import com.android.sdklib.build.ApkBuilder;
 import com.google.appinventor.buildserver.util.AARLibraries;
 import com.google.appinventor.buildserver.util.AARLibrary;
 import com.google.appinventor.components.common.ComponentDescriptorConstants;
@@ -17,19 +20,16 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
-import com.android.ide.common.internal.AaptCruncher;
-import com.android.ide.common.internal.PngCruncher;
-import com.android.sdklib.build.ApkBuilder;
-
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.jettison.json.JSONTokener;
 
+import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -46,14 +46,21 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.lang.Math;
-
-import javax.imageio.ImageIO;
 
 /**
  * Main entry point for the YAIL compiler.
@@ -1873,7 +1880,15 @@ public final class Compiler {
     d8Command.add("--output");
     d8Command.add(dexedClassesDir);
 
-    d8Command.addAll(input);
+    File argfile = null;
+    try {
+      argfile = File.createTempFile("argfile", ".txt");
+      java.nio.file.Files.write(argfile.toPath(), input, StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    if (argfile != null)
+      d8Command.add("@" + argfile.getAbsolutePath());
 
     String[] d8CommandLine = d8Command.toArray(new String[0]);
 

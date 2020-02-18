@@ -268,7 +268,6 @@ public final class Compiler {
 
   private File libsDir; // The directory that will contain any native libraries for packaging
   private String dexCacheDir;
-  private boolean hasSecondDex = false; // True if classes2.dex should be added to the APK
   private int minSdkForCompilation = Integer.parseInt(DEFAULT_MIN_SDK);
 
   private JSONArray simpleCompsBuildInfo;
@@ -1402,12 +1401,8 @@ public final class Compiler {
   private boolean runApkBuilder(String apkAbsolutePath, String zipArchive, String dexedClassesDir) {
     try {
       ApkBuilder apkBuilder =
-          new ApkBuilder(apkAbsolutePath, zipArchive,
-            dexedClassesDir + File.separator + "classes.dex", null, System.out);
-      if (hasSecondDex) {
-        apkBuilder.addFile(new File(dexedClassesDir + File.separator + "classes2.dex"),
-          "classes2.dex");
-      }
+          new ApkBuilder(apkAbsolutePath, zipArchive, null, null, System.out);
+      apkBuilder.addSourceFolder(new File(dexedClassesDir)); // automagically resolve classesN.dex
       if (nativeLibsNeeded.size() != 0) { // Need to add native libraries...
         apkBuilder.addNativeLibraries(libsDir);
       }

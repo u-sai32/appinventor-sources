@@ -800,7 +800,6 @@ public class Form extends AppInventorCompatActivity
 
   @Override
   protected void onDestroy() {
-    super.onDestroy();
     // for debugging and future growth
     Log.i(LOG_TAG, "Form " + formName + " got onDestroy");
 
@@ -810,6 +809,9 @@ public class Form extends AppInventorCompatActivity
     for (OnDestroyListener onDestroyListener : onDestroyListeners) {
       onDestroyListener.onDestroy();
     }
+
+    // call super method at the end to delegate the destruction of the app to the parent
+    super.onDestroy();
   }
 
   public void registerForOnDestroy(OnDestroyListener component) {

@@ -367,6 +367,9 @@ Component for displaying images and basic animations.
  The allowable motions are `ScrollRightSlow`, `ScrollRight`, `ScrollRightFast`,
  `ScrollLeftSlow`, `ScrollLeft`, `ScrollLeftFast`, and `Stop`.
 
+{:id="Image.Clickable" .boolean} *Clickable*
+: Specifies whether the image should be clickable or not.
+
 {:id="Image.Height" .number .bo} *Height*
 : Specifies the `Image`'s vertical height, measured in pixels.
 
@@ -400,8 +403,9 @@ Component for displaying images and basic animations.
 ### Events  {#Image-Events}
 
 {:.events}
-None
 
+{:id="Image.Click"} Click()
+: An event that occurs when an image is clicked.
 
 ### Methods  {#Image-Methods}
 
@@ -974,9 +978,27 @@ Top-level component containing all other components in the program.
  up to 1024x1024 pixels. Larger images may cause compiling or installing the app to fail.
  The build server will generate images of standard dimensions for Android devices.
 
+{:id="Screen.LightNavigationBar" .boolean .do} *LightNavigationBar*
+: This sets the text color used in the navigation bar in Android Oreo (8.0) and later.
+
+{:id="Screen.LightStatusBar" .boolean .do} *LightStatusBar*
+: This sets the text color used in the status bar in Android Marshmallow (6.0) and later.
+
+{:id="Screen.NavigationBarColor" .color .do} *NavigationBarColor*
+: This is the color used for the navigation bar in Android Lollipop (5.0) and later.
+
 {:id="Screen.OpenScreenAnimation" .text} *OpenScreenAnimation*
 : The animation for switching to another screen. Valid options are `default`, `fade`, `zoom`,
  `slidehorizontal`, `slidevertical`, and `none`.
+
+{:id="Screen.Platform" .text .ro .bo} *Platform*
+: Gets the name of the underlying platform running the app. Currently, this is the text
+ "Android". Other platforms may be supported in the future.
+
+{:id="Screen.PlatformVersion" .text .ro .bo} *PlatformVersion*
+: Gets the version number of the platform running the app. This is typically a dotted version
+ number, such as 10.0. Any value can be returned, however, so you should take care to handle
+ unexpected data. If the platform version is unavailable, the empty text will be returned.
 
 {:id="Screen.PrimaryColor" .color .do} *PrimaryColor*
 : This is the primary color used as part of the Android theme, including coloring the `Screen`'s
@@ -1017,6 +1039,9 @@ Top-level component containing all other components in the program.
 
    **Note:** This property appears on Screen1 only and controls the sizing for all screens in
  the app.
+
+{:id="Screen.StatusBarColor" .color .do} *StatusBarColor*
+: This is the color used for the status bar in Android Lollipop (5.0) and later.
 
 {:id="Screen.Theme" .text .wo .do} *Theme*
 : Selects the theme for the application. Theme can only be set at compile time and the Companion

@@ -729,6 +729,10 @@ public final class YoungAndroidFormUpgrader {
       // The ExtendMovesOutsideCanvas property was added in version 12.
       srcCompVersion = 12;
     }
+    if (srcCompVersion < 13) {
+      // The BackgroundImageinBase64 property was added in version 13.
+      srcCompVersion = 13;
+    }
     return srcCompVersion;
   }
 
@@ -1018,6 +1022,27 @@ public final class YoungAndroidFormUpgrader {
       srcCompVersion = 26;
     }
 
+    if (srcCompVersion < 27) {
+      // Platform and PlatformVersion blocks were added.
+      // Infer StatusBarColor and NavigationBarColor from PrimaryColorDark and PrimaryColor, respectively.
+      if (componentProperties.containsKey("PrimaryColorDark")) {
+        final String value = componentProperties.get("PrimaryColorDark").asString().getString();
+        componentProperties.put("StatusBarColor", new ClientJsonString(value));
+      }
+      if (componentProperties.containsKey("PrimaryColor")) {
+        final String value = componentProperties.get("PrimaryColor").asString().getString();
+        componentProperties.put("NavigationBarColor", new ClientJsonString(value));
+      }
+      // Assume that if the theme "Black Title Text" ("AppTheme.Light") is selected,
+      // the status bar and navigation bar will have a light background,
+      // so set LightStatusBar and LightNavigationBar to true.
+      if (componentProperties.containsKey("Theme") && "AppTheme.Light".equals(componentProperties.get("Theme").asString().toString())) {
+        componentProperties.put("LightStatusBar", new ClientJsonString("True"));
+        componentProperties.put("LightNavigationBar", new ClientJsonString("True"));
+      }
+      srcCompVersion = 27;
+    }
+
     return srcCompVersion;
   }
 
@@ -1075,6 +1100,11 @@ public final class YoungAndroidFormUpgrader {
       //   }
       // }
       srcCompVersion = 3;
+    }
+    if (srcCompVersion < 4) {
+     // The Click event was added.
+     // The Clickable property was added.
+     srcCompVersion = 4;
     }
     return srcCompVersion;
   }

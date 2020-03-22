@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2019 MIT, All rights reserved
+// Copyright 2011-2020 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -138,6 +138,10 @@ public class Form extends AppInventorCompatActivity
 
   private static final int DEFAULT_PRIMARY_COLOR_DARK = PaintUtil.hexStringToInt(ComponentConstants.DEFAULT_PRIMARY_DARK_COLOR);
   private static final int DEFAULT_ACCENT_COLOR = PaintUtil.hexStringToInt(ComponentConstants.DEFAULT_ACCENT_COLOR);
+  private static final int DEFAULT_STATUS_BAR_COLOR = PaintUtil.hexStringToInt(ComponentConstants.DEFAULT_STATUS_BAR_COLOR);
+  private static final Boolean DEFAULT_LIGHT_STATUS_BAR = ComponentConstants.DEFAULT_LIGHT_STATUS_BAR;
+  private static final Boolean DEFAULT_LIGHT_NAVIGATION_BAR = ComponentConstants.DEFAULT_LIGHT_NAVIGATION_BAR;
+  private static final int DEFAULT_NAVIGATION_BAR_COLOR = PaintUtil.hexStringToInt(ComponentConstants.DEFAULT_NAVIGATION_BAR_COLOR);
 
   // Keep track of the current form object.
   // activeForm always holds the Form that is currently handling event dispatching so runtime.scm
@@ -192,10 +196,14 @@ public class Form extends AppInventorCompatActivity
   private String openAnimType;
   private String closeAnimType;
 
-  // Syle information
+  // Style information
   private int primaryColor = DEFAULT_PRIMARY_COLOR;
   private int primaryColorDark = DEFAULT_PRIMARY_COLOR_DARK;
   private int accentColor = DEFAULT_ACCENT_COLOR;
+  private int statusBarColor = DEFAULT_STATUS_BAR_COLOR;
+  private Boolean lightStatusBar = DEFAULT_LIGHT_STATUS_BAR;
+  private int navigationBarColor = DEFAULT_NAVIGATION_BAR_COLOR;
+  private Boolean lightNavigationBar = DEFAULT_LIGHT_NAVIGATION_BAR;
 
   private FrameLayout frameLayout;
   private boolean scrollable;
@@ -455,6 +463,10 @@ public class Form extends AppInventorCompatActivity
     AccentColor(DEFAULT_ACCENT_COLOR);
     PrimaryColor(DEFAULT_PRIMARY_COLOR);
     PrimaryColorDark(DEFAULT_PRIMARY_COLOR_DARK);
+    StatusBarColor(DEFAULT_STATUS_BAR_COLOR);
+    LightStatusBar(DEFAULT_LIGHT_STATUS_BAR);
+    NavigationBarColor(DEFAULT_NAVIGATION_BAR_COLOR);
+    LightNavigationBar(DEFAULT_LIGHT_NAVIGATION_BAR);
     Theme(ComponentConstants.DEFAULT_THEME);
     ScreenOrientation("unspecified");
     BackgroundColor(Component.COLOR_DEFAULT);
@@ -560,22 +572,14 @@ public class Form extends AppInventorCompatActivity
 
   /*
    * Here we override the hardware back button, just to make sure
-   * that the closing screen animation is applied. (In API level
-   * 5, we can simply override the onBackPressed method rather
-   * than bothering with onKeyDown)
+   * that the closing screen animation is applied.
    */
   @Override
-  public boolean onKeyDown(int keyCode, KeyEvent event) {
-    if (keyCode == KeyEvent.KEYCODE_BACK) {
-      if (!BackPressed()) {
-        boolean handled = super.onKeyDown(keyCode, event);
-        AnimationUtil.ApplyCloseScreenAnimation(this, closeAnimType);
-        return handled;
-      } else {
-        return true;
-      }
+  public void onBackPressed() {
+    if (!BackPressed()) {
+      AnimationUtil.ApplyCloseScreenAnimation(this, closeAnimType);
     }
-    return super.onKeyDown(keyCode, event);
+    super.onBackPressed();
   }
 
   @SimpleEvent(description = "Device back button pressed.")
@@ -1879,6 +1883,106 @@ public class Form extends AppInventorCompatActivity
     return accentColor;
   }
 
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_COLOR,
+      defaultValue = ComponentConstants.DEFAULT_STATUS_BAR_COLOR)
+  @SimpleProperty(userVisible = false, description = "This is the color used for the status bar " + 
+    "in Android Lollipop (5.0) and later.", category = PropertyCategory.APPEARANCE)
+  public void StatusBarColor(int color) {
+    statusBarColor = color;
+    if (SdkLevel.getLevel() < SdkLevel.LEVEL_LOLLIPOP) {
+      // setStatusBarColor is available on SDK 21 or higher
+      return;
+    }
+    getWindow().setStatusBarColor(statusBarColor);
+  }
+
+  /**
+   * This is the color used for the status bar in Android Lollipop (5.0) and later.
+   */
+  @SimpleProperty()
+  @IsColor
+  public int StatusBarColor() {
+    return statusBarColor;
+  }
+
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
+      defaultValue = "False")
+  @SimpleProperty(userVisible = false, description = "This sets the text color used in the status bar " + 
+    "in Android Marshmallow (6.0) and later.", category = PropertyCategory.APPEARANCE)
+  public void LightStatusBar(boolean light) {
+    lightStatusBar = light;
+    if (SdkLevel.getLevel() < SdkLevel.LEVEL_MARSHMALLOW) {
+      // setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR) is available on SDK 23 or higher
+      return;
+    }
+    View v1 = getWindow().getDecorView();
+    int flags = v1.getSystemUiVisibility();
+    if (light) {
+      flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+    } else {
+      flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+    }
+    v1.setSystemUiVisibility(flags);
+  }
+
+  /**
+   * This sets the text color used in the status bar in Android Marshmallow (6.0) and later.
+   */
+  @SimpleProperty()
+  public boolean LightStatusBar() {
+    return lightStatusBar;
+  }
+
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_COLOR,
+      defaultValue = ComponentConstants.DEFAULT_NAVIGATION_BAR_COLOR)
+  @SimpleProperty(userVisible = false, description = "This is the color used for the navigation bar " + 
+    "in Android Lollipop (5.0) and later.", category = PropertyCategory.APPEARANCE)
+  public void NavigationBarColor(int color) {
+    navigationBarColor = color;
+    if (SdkLevel.getLevel() < SdkLevel.LEVEL_LOLLIPOP) {
+      // setNavigationBarColor is available on SDK 21 or higher
+      return;
+    }
+    getWindow().setNavigationBarColor(navigationBarColor);
+  }
+
+  /**
+   * This is the color used for the navigation bar in Android Lollipop (5.0) and later.
+   */
+  @SimpleProperty()
+  @IsColor
+  public int NavigationBarColor() {
+    return navigationBarColor;
+  }
+
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
+      defaultValue = "False")
+  @SimpleProperty(userVisible = false, description = "This sets the text color used in the navigation bar " + 
+    "in Android Oreo (8.0) and later.", category = PropertyCategory.APPEARANCE)
+  public void LightNavigationBar(boolean light) {
+    lightNavigationBar = light;
+    if (SdkLevel.getLevel() < SdkLevel.LEVEL_OREO) {
+      // setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR) is available on SDK 26 or higher
+      return;
+    }
+    View v1 = getWindow().getDecorView();
+    int flags = v1.getSystemUiVisibility();
+    if (light) {
+      flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+    } else {
+      flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+    }
+    v1.setSystemUiVisibility(flags);
+  }
+
+  /**
+   * This sets the text color used in the navigation bar in Android Oreo (8.0) and later.
+   */
+  @SimpleProperty()
+  public boolean LightNavigationBar() {
+    return lightNavigationBar;
+  }
+
   /**
    * Selects the theme for the application. Theme can only be set at compile time and the Companion
    * will approximate changes during live development. Possible options are:
@@ -1969,6 +2073,31 @@ public class Form extends AppInventorCompatActivity
   public void BlocksToolkit(String json) {
     // We don't actually do anything. This property is stored in the
     // project properties file
+  }
+
+  /**
+   * Gets the name of the underlying platform running the app. Currently, this is the text
+   * "Android". Other platforms may be supported in the future.
+   *
+   * @return The platform running the app
+   */
+  @SimpleProperty(description = "The platform the app is running on, for example \"Android\" or "
+      + "\"iOS\".")
+  public String Platform() {
+    return "Android";
+  }
+
+  /**
+   * Gets the version number of the platform running the app. This is typically a dotted version
+   * number, such as 10.0. Any value can be returned, however, so you should take care to handle
+   * unexpected data. If the platform version is unavailable, the empty text will be returned.
+   *
+   * @return The version of the platform running the app
+   */
+  @SimpleProperty(description = "The dotted version number of the platform, such as 4.2.2 or 10.0. "
+      + "This is platform specific and there is no guarantee that it has a particular format.")
+  public String PlatformVersion() {
+    return Build.VERSION.RELEASE;
   }
 
   /**

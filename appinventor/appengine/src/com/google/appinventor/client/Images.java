@@ -655,6 +655,12 @@ public interface Images extends Resources {
   ImageResource mediaIconVideo();
 
   /**
+   * Designer palette item:
+   */
+  @Source("com/google/appinventor/images/navigation.png")
+  ImageResource navigationComponent();
+
+  /**
   * Wilson Logo 
   */
   @Source("com/google/appinventor/images/wilson.png")
@@ -671,5 +677,4 @@ public interface Images extends Resources {
   */
   @Source("com/google/appinventor/images/YRLogo.png")
   ImageResource YRLogo();
-
 }

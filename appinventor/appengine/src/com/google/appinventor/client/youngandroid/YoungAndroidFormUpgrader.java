@@ -729,6 +729,10 @@ public final class YoungAndroidFormUpgrader {
       // The ExtendMovesOutsideCanvas property was added in version 12.
       srcCompVersion = 12;
     }
+    if (srcCompVersion < 13) {
+      // The BackgroundImageinBase64 property was added in version 13.
+      srcCompVersion = 13;
+    }
     return srcCompVersion;
   }
 
@@ -745,14 +749,16 @@ public final class YoungAndroidFormUpgrader {
 
   private static int upgradeClockProperties(Map<String, JSONValue> componentProperties,
     int srcCompVersion) {
-    if (srcCompVersion < 4) {
+    if (srcCompVersion < 5) {
       // (2) The FormatDate and FormatDateTime methods were modified to take another parameter of pattern.
       // No properties need to be modified to upgrade to version 2.
       // (3) Duration Support was added
       // No properties need to be added to upgrade to version 3.
       // (4) Added MakeDate, MakeTime, MakeInstantFromParts methods
       // No properties need to be added to upgrade to version 4.
-      srcCompVersion = 4;
+      // (5) Added Timezones property, ChangeTimezone method
+      // No properties need to be added to upgrade to version 5.
+      srcCompVersion = 5;
     }
     return srcCompVersion;
   }
@@ -1018,6 +1024,11 @@ public final class YoungAndroidFormUpgrader {
       srcCompVersion = 26;
     }
 
+    if (srcCompVersion < 27) {
+      // Platform and PlatformVersion blocks were added.
+      srcCompVersion = 27;
+    }
+
     return srcCompVersion;
   }
 
@@ -1075,6 +1086,11 @@ public final class YoungAndroidFormUpgrader {
       //   }
       // }
       srcCompVersion = 3;
+    }
+    if (srcCompVersion < 4) {
+     // The Click event was added.
+     // The Clickable property was added.
+     srcCompVersion = 4;
     }
     return srcCompVersion;
   }
